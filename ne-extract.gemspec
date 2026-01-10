@@ -22,4 +22,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "dry-cli", "~> 1.0"
   spec.add_dependency "rainbow", "~> 3.1"
+  spec.add_dependency "csv", "~> 3.3"
 end

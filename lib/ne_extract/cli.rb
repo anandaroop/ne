@@ -81,20 +81,121 @@ module NeExtract
         option :buffer, type: :string, aliases: ["b"], desc: "Expand extent by percentage (default: 20)"
         option :layers, type: :string, aliases: ["l"], desc: "Comma-separated layer list (default: standard basemap layers)"
 
+        NE_DATA_DIR = "/Users/Shared/Geodata/ne"
+
         def call(scale: nil, extent: nil, buffer: nil, layers: nil, **)
-          unless scale
+          # Validate scale
+          unless ["10", "50", "110"].include?(scale)
             print_scale_reminder
             return
           end
 
-          puts Rainbow("Extract command - to be implemented").yellow
-          puts "Scale: #{scale}"
-          puts "Extent: #{extent}"
-          puts "Buffer: #{buffer}" if buffer
-          puts "Layers: #{layers}" if layers
+          # Parse and validate extent
+          parsed_extent = ExtentParser.parse(extent)
+          unless parsed_extent
+            puts Rainbow("Error: Invalid extent format. Use: xmin,ymin,xmax,ymax").red
+            return
+          end
+
+          # Parse buffer (default 20%)
+          buffer_pct = ExtentParser.parse_buffer(buffer)
+          unless buffer_pct
+            puts Rainbow("Error: Invalid buffer format. Use a number between 0-100 or 0.0-1.0").red
+            return
+          end
+
+          # Calculate buffered extent
+          buffered_extent = ExtentParser.apply_buffer(parsed_extent, buffer_pct)
+
+          # Determine layers to extract
+          layer_list = LayerResolver.resolve_layers(layers)
+          if layer_list.empty?
+            puts Rainbow("Error: No valid layers specified").red
+            return
+          end
+
+          # Build layer map from CSV
+          csv_path = File.join(Dir.pwd, "ne.csv")
+          layer_map = LayerResolver.build_layer_map(csv_path, scale)
+          if layer_map.empty?
+            puts Rainbow("Error: Could not read layer information from ne.csv").red
+            return
+          end
+
+          # Filter to available layers
+          filtered = LayerResolver.filter_available(layer_list, layer_map)
+          available_layers = filtered[:available]
+          unavailable_layers = filtered[:unavailable]
+
+          if available_layers.empty?
+            puts Rainbow("Error: None of the specified layers are available at scale #{scale}").red
+            puts "Unavailable layers: #{unavailable_layers.join(", ")}" unless unavailable_layers.empty?
+            return
+          end
+
+          # Create destination directory
+          dest_dir = ExtentParser.directory_name(scale, parsed_extent)
+          Dir.mkdir(dest_dir) unless Dir.exist?(dest_dir)
+
+          puts Rainbow("\nExtracting to: #{dest_dir}").bright.cyan
+          puts Rainbow("Scale: #{scale}m (1:#{scale},000,000)").white
+          puts Rainbow("Original extent: #{ExtentParser.format(parsed_extent)}").white
+          puts Rainbow("Buffered extent: #{ExtentParser.format(buffered_extent)} (#{buffer_pct}% buffer)").white
+          puts Rainbow("Layers: #{available_layers.size}").white
+
+          if unavailable_layers.any?
+            puts Rainbow("\nSkipping unavailable layers: #{unavailable_layers.join(", ")}").yellow
+          end
+
+          puts ""
+
+          # Extract each layer
+          success_count = 0
+          available_layers.each_with_index do |layer, idx|
+            layer_info = layer_map[layer]
+            source_path = File.join(NE_DATA_DIR, "#{scale}m_#{layer_info[:theme]}", "ne_#{scale}m_#{layer}.shp")
+
+            print "  [#{idx + 1}/#{available_layers.size}] #{layer}... "
+
+            if extract_layer(source_path, dest_dir, buffered_extent)
+              puts Rainbow("✓").green
+              success_count += 1
+            else
+              puts Rainbow("✗").red
+            end
+          end
+
+          puts ""
+          if success_count == available_layers.size
+            puts Rainbow("✓ Successfully extracted #{success_count} layers").green
+          else
+            puts Rainbow("⚠ Extracted #{success_count}/#{available_layers.size} layers").yellow
+          end
         end
 
         private
+
+        def extract_layer(source_path, dest_dir, extent)
+          unless File.exist?(source_path)
+            warn "    Source file not found: #{source_path}" if ENV["DEBUG"]
+            return false
+          end
+
+          cmd = [
+            "ogr2ogr",
+            "-spat", extent[:xmin].to_s, extent[:ymin].to_s, extent[:xmax].to_s, extent[:ymax].to_s,
+            "-clipsrc", "spat_extent",
+            dest_dir,
+            source_path
+          ]
+
+          if ENV["DEBUG"]
+            warn "    Command: #{cmd.join(" ")}"
+            system(*cmd)
+          else
+            system(*cmd, out: File::NULL, err: File::NULL)
+          end
+        end
 
         def print_scale_reminder
           puts Rainbow("\nError: --scale is required\n").red

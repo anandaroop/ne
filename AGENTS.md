@@ -51,7 +51,9 @@ Primary Use Case: What's the main problem this tool solves? (e.g., "quickly extr
 
 ### Deriving the destination directory
 
-The destination folder should be derived from the scale and extent, for example: - if the xmin,ymin,xmas,ymax extent is `-95.0,28.0,-87.7,33.8` and the scale is `10` - then the destination folder is `ne-10m--95.0-28.0--87.7-33.8`
+The destination folder should be derived from the scale and extent, with coordinates rounded to integers (to avoid `.` characters which confuse ogr2ogr). For example:
+- if the xmin,ymin,xmax,ymax extent is `-95.0,28.0,-87.7,33.8` and the scale is `10`
+- then the destination folder is `ne-10m--95-28--88-34` (coordinates rounded to nearest integer)
 
 ### Sample of `ogr2ogr` usage
 
@@ -64,9 +66,9 @@ ogr2ogr -spat <extent> -clipsrc spat_extent <destination folder> /Users/Shared/G
 Specific examples:
 
 ```sh
-ogr2ogr -spat -95.0 28.0 -87.7 33.8 -clipsrc spat_extent ne-10m--95.0-28.0--87.7-33.8 /Users/Shared/Geodata/ne/10m_physical/ne_10m_land.shp
-ogr2ogr -spat -95.0 28.0 -87.7 33.8 -clipsrc spat_extent ne-10m--95.0-28.0--87.7-33.8 /Users/Shared/Geodata/ne/10m_cultural/ne_10m_admin_0_countries.shp
-ogr2ogr -spat -95.0 28.0 -87.7 33.8 -clipsrc spat_extent ne-10m--95.0-28.0--87.7-33.8 /Users/Shared/Geodata/ne/10m_cultural/ne_10m_admin_0_boundary_lines_land.shp
+ogr2ogr -spat -95.0 28.0 -87.7 33.8 -clipsrc spat_extent ne-10m--95-28--88-34 /Users/Shared/Geodata/ne/10m_physical/ne_10m_land.shp
+ogr2ogr -spat -95.0 28.0 -87.7 33.8 -clipsrc spat_extent ne-10m--95-28--88-34 /Users/Shared/Geodata/ne/10m_cultural/ne_10m_admin_0_countries.shp
+ogr2ogr -spat -95.0 28.0 -87.7 33.8 -clipsrc spat_extent ne-10m--95-28--88-34 /Users/Shared/Geodata/ne/10m_cultural/ne_10m_admin_0_boundary_lines_land.shp
 ```
 
 ## User stories
