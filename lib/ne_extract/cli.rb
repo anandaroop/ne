@@ -80,15 +80,20 @@ module NeExtract
         option :extent, type: :string, required: true, aliases: ["e"], desc: "Spatial extent: xmin,ymin,xmax,ymax"
         option :buffer, type: :string, aliases: ["b"], desc: "Expand extent by percentage (default: 20)"
         option :layers, type: :string, aliases: ["l"], desc: "Comma-separated layer list (default: standard basemap layers)"
+        option :output, type: :string, aliases: ["o"], desc: "Output directory (default: current directory)"
 
         NE_DATA_DIR = "/Users/Shared/Geodata/ne"
 
-        def call(scale: nil, extent: nil, buffer: nil, layers: nil, **)
+        def call(scale: nil, extent: nil, buffer: nil, layers: nil, output: nil, **)
           # Validate scale
           unless ["10", "50", "110"].include?(scale)
             print_scale_reminder
             return
           end
+
+          # Validate and normalize output directory
+          output_dir = validate_output_directory(output)
+          return unless output_dir
 
           # Parse and validate extent
           parsed_extent = ExtentParser.parse(extent)
@@ -134,7 +139,7 @@ module NeExtract
           end
 
           # Find available destination directory (with sequence number if needed)
-          dest_dir = ExtentParser.find_available_directory(scale, parsed_extent)
+          dest_dir = ExtentParser.find_available_directory(scale, parsed_extent, output_dir)
           Dir.mkdir(dest_dir)
 
           puts Rainbow("\nExtracting to: #{dest_dir}").bright.cyan
@@ -174,6 +179,28 @@ module NeExtract
         end
 
         private
+
+        def validate_output_directory(output)
+          # Default to current working directory if not specified
+          dir = output || Dir.pwd
+
+          # Expand path to handle ~ and relative paths
+          expanded_dir = File.expand_path(dir)
+
+          # Check if directory exists
+          unless Dir.exist?(expanded_dir)
+            puts Rainbow("Error: Output directory does not exist: #{expanded_dir}").red
+            return nil
+          end
+
+          # Check if directory is writable
+          unless File.writable?(expanded_dir)
+            puts Rainbow("Error: Output directory is not writable: #{expanded_dir}").red
+            return nil
+          end
+
+          expanded_dir
+        end
 
         def extract_layer(source_path, dest_dir, extent)
           unless File.exist?(source_path)

@@ -1,4 +1,6 @@
 require "spec_helper"
+require "tmpdir"
+require "fileutils"
 require_relative "../lib/ne_extract/extent_parser"
 
 RSpec.describe NeExtract::ExtentParser do
@@ -192,45 +194,77 @@ RSpec.describe NeExtract::ExtentParser do
       end
     end
 
-    it "returns base name when directory does not exist" do
-      result = described_class.find_available_directory("110", extent)
-      expect(result).to eq(base_name)
+    context "with default base path (current directory)" do
+      it "returns full path when directory does not exist" do
+        result = described_class.find_available_directory("110", extent)
+        expect(result).to eq(File.join(Dir.pwd, base_name))
+      end
+
+      it "returns path with -1 when base exists" do
+        Dir.mkdir(base_name)
+
+        result = described_class.find_available_directory("110", extent)
+        expect(result).to eq(File.join(Dir.pwd, "#{base_name}-1"))
+      end
+
+      it "returns path with -2 when base and -1 exist" do
+        Dir.mkdir(base_name)
+        Dir.mkdir("#{base_name}-1")
+
+        result = described_class.find_available_directory("110", extent)
+        expect(result).to eq(File.join(Dir.pwd, "#{base_name}-2"))
+      end
+
+      it "finds next available sequence number" do
+        Dir.mkdir(base_name)
+        Dir.mkdir("#{base_name}-1")
+        Dir.mkdir("#{base_name}-2")
+
+        result = described_class.find_available_directory("110", extent)
+        expect(result).to eq(File.join(Dir.pwd, "#{base_name}-3"))
+      end
+
+      it "works with different scales" do
+        extent_10 = {xmin: -95.0, ymin: 28.0, xmax: -88.0, ymax: 32.0}
+        base_10 = "ne-10m--95-28--88-32"
+
+        Dir.mkdir(base_10)
+
+        result = described_class.find_available_directory("10", extent_10)
+        expect(result).to eq(File.join(Dir.pwd, "#{base_10}-1"))
+
+        Dir.rmdir(base_10)
+      end
     end
 
-    it "returns base name with -1 when base exists" do
-      Dir.mkdir(base_name)
+    context "with custom base path" do
+      let(:temp_dir) { Dir.mktmpdir }
+      let(:dir_name) { "ne-110m--95-28--88-32" }
 
-      result = described_class.find_available_directory("110", extent)
-      expect(result).to eq("#{base_name}-1")
-    end
+      after do
+        # Clean up test directories in temp dir
+        FileUtils.rm_rf(temp_dir) if Dir.exist?(temp_dir)
+      end
 
-    it "returns base name with -2 when base and -1 exist" do
-      Dir.mkdir(base_name)
-      Dir.mkdir("#{base_name}-1")
+      it "returns full path in custom directory when directory does not exist" do
+        result = described_class.find_available_directory("110", extent, temp_dir)
+        expect(result).to eq(File.join(temp_dir, dir_name))
+      end
 
-      result = described_class.find_available_directory("110", extent)
-      expect(result).to eq("#{base_name}-2")
-    end
+      it "returns path with -1 when base exists in custom directory" do
+        Dir.mkdir(File.join(temp_dir, dir_name))
 
-    it "finds next available sequence number" do
-      Dir.mkdir(base_name)
-      Dir.mkdir("#{base_name}-1")
-      Dir.mkdir("#{base_name}-2")
+        result = described_class.find_available_directory("110", extent, temp_dir)
+        expect(result).to eq(File.join(temp_dir, "#{dir_name}-1"))
+      end
 
-      result = described_class.find_available_directory("110", extent)
-      expect(result).to eq("#{base_name}-3")
-    end
+      it "finds next available sequence in custom directory" do
+        Dir.mkdir(File.join(temp_dir, dir_name))
+        Dir.mkdir(File.join(temp_dir, "#{dir_name}-1"))
 
-    it "works with different scales" do
-      extent_10 = {xmin: -95.0, ymin: 28.0, xmax: -88.0, ymax: 32.0}
-      base_10 = "ne-10m--95-28--88-32"
-
-      Dir.mkdir(base_10)
-
-      result = described_class.find_available_directory("10", extent_10)
-      expect(result).to eq("#{base_10}-1")
-
-      Dir.rmdir(base_10)
+        result = described_class.find_available_directory("110", extent, temp_dir)
+        expect(result).to eq(File.join(temp_dir, "#{dir_name}-2"))
+      end
     end
   end
 end
