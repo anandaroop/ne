@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
 
-require_relative "../lib/ne_extract"
+require_relative "../lib/natural_earth"
 
-Dry::CLI.new(NeExtract::CLI::Commands).call
+Dry::CLI.new(NaturalEarth::CLI::Commands).call

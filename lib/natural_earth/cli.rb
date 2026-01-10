@@ -2,7 +2,7 @@ require "dry/cli"
 require "rainbow"
 require "csv"
 
-module NeExtract
+module NaturalEarth
   module CLI
     module Commands
       extend Dry::CLI::Registry

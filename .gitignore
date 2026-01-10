@@ -29,5 +29,5 @@ coverage/
 .idea/
 *.iml
 
-# Output directories from ne-extract itself
+# Output directories from ne itself
 ne-*m-*/

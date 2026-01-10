@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ne-extract (0.1.0)
+    ne (0.1.0)
       csv (~> 3.3)
       dry-cli (~> 1.0)
       rainbow (~> 3.1)
@@ -78,7 +78,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  ne-extract!
+  ne!
   rake (~> 13.0)
   rspec (~> 3.12)
   standard (~> 1.35)

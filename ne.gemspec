@@ -1,14 +1,14 @@
-require_relative "lib/ne_extract/version"
+require_relative "lib/natural_earth/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "ne-extract"
-  spec.version = NeExtract::VERSION
+  spec.name = "ne"
+  spec.version = NaturalEarth::VERSION
   spec.authors = ["Your Name"]
   spec.email = ["your.email@example.com"]
 
   spec.summary = "Extract vector basemap data from the Natural Earth dataset"
   spec.description = "A command-line tool that wraps ogr2ogr to quickly extract relevant data from Natural Earth in shapefile format"
-  spec.homepage = "https://github.com/yourusername/ne-extract"
+  spec.homepage = "https://github.com/yourusername/ne"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.4.0"
 

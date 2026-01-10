@@ -1,8 +1,8 @@
 require "spec_helper"
 require "tempfile"
-require_relative "../lib/ne_extract/layer_resolver"
+require_relative "../lib/natural_earth/layer_resolver"
 
-RSpec.describe NeExtract::LayerResolver do
+RSpec.describe NaturalEarth::LayerResolver do
   describe ".resolve_layers" do
     it "returns default layers for nil input" do
       result = described_class.resolve_layers(nil)

@@ -1,9 +1,9 @@
 require "spec_helper"
 require "tmpdir"
 require "fileutils"
-require_relative "../lib/ne_extract/extent_parser"
+require_relative "../lib/natural_earth/extent_parser"
 
-RSpec.describe NeExtract::ExtentParser do
+RSpec.describe NaturalEarth::ExtentParser do
   describe ".parse" do
     it "parses valid extent string" do
       result = described_class.parse("-95.0,28.0,-87.7,33.8")

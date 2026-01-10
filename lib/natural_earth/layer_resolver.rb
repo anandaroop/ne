@@ -1,6 +1,6 @@
 require "csv"
 
-module NeExtract
+module NaturalEarth
   module LayerResolver
     DEFAULT_LAYERS = %w[
       land

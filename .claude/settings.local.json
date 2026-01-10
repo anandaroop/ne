@@ -7,7 +7,8 @@
       "Bash(git add:*)",
       "Bash(bundle exec rake lint:*)",
       "Bash(bundle exec rspec:*)",
-      "Bash(bundle exec rake:*)"
+      "Bash(bundle exec rake:*)",
+      "Bash(git mv:*)"
     ]
   }
 }

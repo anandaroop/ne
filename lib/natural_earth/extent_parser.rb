@@ -1,4 +1,4 @@
-module NeExtract
+module NaturalEarth
   module ExtentParser
     module_function
 

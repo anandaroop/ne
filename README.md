@@ -1,8 +1,8 @@
-# ne-extract
+# ne
 
 A command-line tool for extracting vector basemap data from the Natural Earth dataset.
 
-`ne-extract` wraps the GDAL `ogr2ogr` utility to quickly extract relevant geospatial layers from Natural Earth in shapefile format for a specific geographic extent.
+`ne` wraps the GDAL `ogr2ogr` utility to quickly extract relevant geospatial layers from Natural Earth in shapefile format for a specific geographic extent.
 
 ## Features
 
@@ -16,7 +16,7 @@ A command-line tool for extracting vector basemap data from the Natural Earth da
 
 ## Prerequisites
 
-Before installing `ne-extract`, you need:
+Before installing `ne`, you need:
 
 1. **Ruby 3.4.5 or later**
 2. **GDAL** with the `ogr2ogr` utility installed
@@ -31,8 +31,8 @@ Before installing `ne-extract`, you need:
 Clone the repository and install as a local gem:
 
 ```bash
-git clone https://github.com/yourusername/ne-extract.git
-cd ne-extract
+git clone https://github.com/yourusername/ne.git
+cd ne
 bundle install
 bundle exec rake install  # installs onto your system
 ```
