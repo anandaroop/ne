@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(bundle install:*)",
+      "Bash(./bin/ne:*)",
+      "Bash(git add:*)",
+      "Bash(bundle exec rake lint:*)",
+      "Bash(bundle exec rspec:*)",
+      "Bash(bundle exec rake:*)"
+    ]
+  }
+}
