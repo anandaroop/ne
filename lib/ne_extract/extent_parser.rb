@@ -77,5 +77,22 @@ module NeExtract
 
       "ne-#{scale}m-#{xmin}-#{ymin}-#{xmax}-#{ymax}"
     end
+
+    # Find available directory name with sequence numbering
+    # If base directory exists, appends -1, -2, etc. until finding an available name
+    # @param scale [String] scale value (10, 50, or 110)
+    # @param extent [Hash] extent with :xmin, :ymin, :xmax, :ymax
+    # @return [String] available directory name
+    def find_available_directory(scale, extent)
+      base_name = directory_name(scale, extent)
+      return base_name unless Dir.exist?(base_name)
+
+      sequence = 1
+      loop do
+        candidate = "#{base_name}-#{sequence}"
+        return candidate unless Dir.exist?(candidate)
+        sequence += 1
+      end
+    end
   end
 end

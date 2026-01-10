@@ -180,4 +180,57 @@ RSpec.describe NeExtract::ExtentParser do
       expect(result).not_to include(".")
     end
   end
+
+  describe ".find_available_directory" do
+    let(:extent) { {xmin: -95.0, ymin: 28.0, xmax: -88.0, ymax: 32.0} }
+    let(:base_name) { "ne-110m--95-28--88-32" }
+
+    after do
+      # Clean up any test directories
+      [base_name, "#{base_name}-1", "#{base_name}-2", "#{base_name}-3"].each do |dir|
+        Dir.rmdir(dir) if Dir.exist?(dir)
+      end
+    end
+
+    it "returns base name when directory does not exist" do
+      result = described_class.find_available_directory("110", extent)
+      expect(result).to eq(base_name)
+    end
+
+    it "returns base name with -1 when base exists" do
+      Dir.mkdir(base_name)
+
+      result = described_class.find_available_directory("110", extent)
+      expect(result).to eq("#{base_name}-1")
+    end
+
+    it "returns base name with -2 when base and -1 exist" do
+      Dir.mkdir(base_name)
+      Dir.mkdir("#{base_name}-1")
+
+      result = described_class.find_available_directory("110", extent)
+      expect(result).to eq("#{base_name}-2")
+    end
+
+    it "finds next available sequence number" do
+      Dir.mkdir(base_name)
+      Dir.mkdir("#{base_name}-1")
+      Dir.mkdir("#{base_name}-2")
+
+      result = described_class.find_available_directory("110", extent)
+      expect(result).to eq("#{base_name}-3")
+    end
+
+    it "works with different scales" do
+      extent_10 = {xmin: -95.0, ymin: 28.0, xmax: -88.0, ymax: 32.0}
+      base_10 = "ne-10m--95-28--88-32"
+
+      Dir.mkdir(base_10)
+
+      result = described_class.find_available_directory("10", extent_10)
+      expect(result).to eq("#{base_10}-1")
+
+      Dir.rmdir(base_10)
+    end
+  end
 end

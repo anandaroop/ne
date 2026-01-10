@@ -133,9 +133,9 @@ module NeExtract
             return
           end
 
-          # Create destination directory
-          dest_dir = ExtentParser.directory_name(scale, parsed_extent)
-          Dir.mkdir(dest_dir) unless Dir.exist?(dest_dir)
+          # Find available destination directory (with sequence number if needed)
+          dest_dir = ExtentParser.find_available_directory(scale, parsed_extent)
+          Dir.mkdir(dest_dir)
 
           puts Rainbow("\nExtracting to: #{dest_dir}").bright.cyan
           puts Rainbow("Scale: #{scale}m (1:#{scale},000,000)").white
