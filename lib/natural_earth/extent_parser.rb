@@ -21,12 +21,37 @@ module NaturalEarth
     end
 
     # Parse buffer value, converting to percentage if needed
+    # Supports single value (both axes) or dual values (EW,NS)
     # @param buffer_str [String, nil] buffer value as string
-    # @return [Float, nil] buffer percentage (0-100) or nil if invalid
+    # @return [Hash, nil] buffer percentages {ew: Float, ns: Float} or nil if invalid
     def parse_buffer(buffer_str)
-      return 20.0 if buffer_str.nil? || buffer_str.empty?
+      return {ew: 20.0, ns: 20.0} if buffer_str.nil? || buffer_str.empty?
 
-      value = Float(buffer_str, exception: false)
+      parts = buffer_str.split(",").map(&:strip)
+
+      # Single value: apply to both axes (backward compatible)
+      if parts.size == 1
+        value = parse_single_buffer_value(parts[0])
+        return nil unless value
+        return {ew: value, ns: value}
+      end
+
+      # Two values: EW and NS
+      if parts.size == 2
+        ew = parse_single_buffer_value(parts[0])
+        ns = parse_single_buffer_value(parts[1])
+        return nil unless ew && ns
+        return {ew: ew, ns: ns}
+      end
+
+      nil # Invalid format (wrong number of values)
+    end
+
+    # Parse a single buffer value, converting to percentage if needed
+    # @param value_str [String] buffer value as string
+    # @return [Float, nil] buffer percentage (0-100) or nil if invalid
+    def parse_single_buffer_value(value_str)
+      value = Float(value_str, exception: false)
       return nil unless value
 
       # Convert to percentage if in range (0,1)
@@ -39,15 +64,16 @@ module NaturalEarth
     end
 
     # Apply buffer to extent by expanding it by a percentage
+    # Supports independent EW and NS buffer percentages
     # @param extent [Hash] extent with :xmin, :ymin, :xmax, :ymax
-    # @param buffer_pct [Float] buffer percentage (0-100)
+    # @param buffer_config [Hash] buffer percentages {:ew => Float, :ns => Float}
     # @return [Hash] buffered extent
-    def apply_buffer(extent, buffer_pct)
+    def apply_buffer(extent, buffer_config)
       width = extent[:xmax] - extent[:xmin]
       height = extent[:ymax] - extent[:ymin]
 
-      buffer_x = width * (buffer_pct / 100.0)
-      buffer_y = height * (buffer_pct / 100.0)
+      buffer_x = width * (buffer_config[:ew] / 100.0)
+      buffer_y = height * (buffer_config[:ns] / 100.0)
 
       {
         xmin: extent[:xmin] - buffer_x,

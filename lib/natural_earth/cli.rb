@@ -110,7 +110,7 @@ module NaturalEarth
 
         option :scale, type: :string, required: true, aliases: ["s"], desc: "Scale: 10, 50, or 110"
         option :extent, type: :string, required: true, aliases: ["e"], desc: "Spatial extent: xmin,ymin,xmax,ymax"
-        option :buffer, type: :string, aliases: ["b"], desc: "Expand extent by percentage (default: 20)"
+        option :buffer, type: :string, aliases: ["b"], desc: "Expand extent by percentage (default: 20). Single value applies to both axes; two values (EW,NS) allow independent control"
         option :layers, type: :string, aliases: ["l"], desc: "Comma-separated layer list (default: standard basemap layers)"
         option :output, type: :string, aliases: ["o"], desc: "Output directory (default: current directory)"
 
@@ -135,14 +135,17 @@ module NaturalEarth
           end
 
           # Parse buffer (default 20%)
-          buffer_pct = ExtentParser.parse_buffer(buffer)
-          unless buffer_pct
-            puts Rainbow("Error: Invalid buffer format. Use a number between 0-100 or 0.0-1.0").red
+          buffer_config = ExtentParser.parse_buffer(buffer)
+          unless buffer_config
+            puts Rainbow("Error: Invalid buffer format").red
+            puts "  Single value: --buffer 20     (applies 20% to both axes)"
+            puts "  Dual values:  --buffer 20,30  (20% EW, 30% NS)"
+            puts "  Values must be between 0-100 or 0.0-1.0"
             return
           end
 
           # Calculate buffered extent
-          buffered_extent = ExtentParser.apply_buffer(parsed_extent, buffer_pct)
+          buffered_extent = ExtentParser.apply_buffer(parsed_extent, buffer_config)
 
           # Build layer map from CSV
           layer_map = LayerResolver.build_layer_map(NE_CSV_PATH, scale)
@@ -176,7 +179,14 @@ module NaturalEarth
           puts Rainbow("\nExtracting to: #{dest_dir}").bright.cyan
           puts Rainbow("Scale: #{scale}m (1:#{scale},000,000)").white
           puts Rainbow("Original extent: #{ExtentParser.format(parsed_extent)}").white
-          puts Rainbow("Buffered extent: #{ExtentParser.format(buffered_extent)} (#{buffer_pct}% buffer)").white
+
+          # Format buffer display
+          buffer_display = if buffer_config[:ew] == buffer_config[:ns]
+            "#{buffer_config[:ew]}% buffer"
+          else
+            "#{buffer_config[:ew]}% EW, #{buffer_config[:ns]}% NS buffer"
+          end
+          puts Rainbow("Buffered extent: #{ExtentParser.format(buffered_extent)} (#{buffer_display})").white
           puts Rainbow("Layers: #{available_layers.size}").white
 
           if unavailable_layers.any?
@@ -358,6 +368,7 @@ module NaturalEarth
           {comment: "extract a coarse basemap of USA", command: "ne extract --scale 110 --extent -124,24,-66,49"},
           {comment: "extract a detailed basemap of Louisiana", command: "ne extract --scale 10 --extent -95,28,-88,34"},
           {comment: "extract a detailed basemap of Louisiana, with a 15% buffer", command: "ne extract --scale 10 --extent -95,28,-88,34 --buffer 15"},
+          {comment: "extract a detailed basemap of Louisiana, with independent EW/NS buffers", command: "ne extract --scale 10 --extent -95,28,-88,34 --buffer 25,15"},
           {comment: "extract a detailed basemap of Louisiana, but only the land and ocean layers", command: "ne extract --scale 10 --extent -95,28,-88,34 --layers land,ocean"},
           {comment: "extract a detailed basemap of Louisiana, with default layers plus populated places", command: "ne extract --scale 10 --extent -95,28,-88,34 --layers default,populated_places"},
           {comment: "extract a detailed basemap of Louisiana, but write to a separate output dir", command: "ne extract --scale 10 --extent -95,28,-88,34 --output ~/tmp"}

@@ -64,38 +64,64 @@ RSpec.describe NaturalEarth::ExtentParser do
   end
 
   describe ".parse_buffer" do
-    it "returns default 20% for nil input" do
-      expect(described_class.parse_buffer(nil)).to eq(20.0)
+    it "returns default 20% for both axes for nil input" do
+      expect(described_class.parse_buffer(nil)).to eq({ew: 20.0, ns: 20.0})
     end
 
-    it "returns default 20% for empty string" do
-      expect(described_class.parse_buffer("")).to eq(20.0)
+    it "returns default 20% for both axes for empty string" do
+      expect(described_class.parse_buffer("")).to eq({ew: 20.0, ns: 20.0})
     end
 
-    it "parses percentage values 0-100" do
-      expect(described_class.parse_buffer("0")).to eq(0.0)
-      expect(described_class.parse_buffer("15")).to eq(15.0)
-      expect(described_class.parse_buffer("50")).to eq(50.0)
-      expect(described_class.parse_buffer("100")).to eq(100.0)
+    it "parses single percentage values 0-100 for both axes" do
+      expect(described_class.parse_buffer("0")).to eq({ew: 0.0, ns: 0.0})
+      expect(described_class.parse_buffer("15")).to eq({ew: 15.0, ns: 15.0})
+      expect(described_class.parse_buffer("50")).to eq({ew: 50.0, ns: 50.0})
+      expect(described_class.parse_buffer("100")).to eq({ew: 100.0, ns: 100.0})
     end
 
-    it "converts decimal values 0-1 to percentages" do
-      expect(described_class.parse_buffer("0.15")).to eq(15.0)
-      expect(described_class.parse_buffer("0.25")).to eq(25.0)
-      expect(described_class.parse_buffer("0.5")).to eq(50.0)
+    it "converts single decimal values 0-1 to percentages for both axes" do
+      expect(described_class.parse_buffer("0.15")).to eq({ew: 15.0, ns: 15.0})
+      expect(described_class.parse_buffer("0.25")).to eq({ew: 25.0, ns: 25.0})
+      expect(described_class.parse_buffer("0.5")).to eq({ew: 50.0, ns: 50.0})
+    end
+
+    it "parses dual values (EW,NS)" do
+      expect(described_class.parse_buffer("20,30")).to eq({ew: 20.0, ns: 30.0})
+      expect(described_class.parse_buffer("0,100")).to eq({ew: 0.0, ns: 100.0})
+      expect(described_class.parse_buffer("50,25")).to eq({ew: 50.0, ns: 25.0})
+    end
+
+    it "parses dual values with spaces" do
+      expect(described_class.parse_buffer("20, 30")).to eq({ew: 20.0, ns: 30.0})
+      expect(described_class.parse_buffer(" 15 , 25 ")).to eq({ew: 15.0, ns: 25.0})
+    end
+
+    it "converts dual decimal values to percentages" do
+      expect(described_class.parse_buffer("0.15,0.25")).to eq({ew: 15.0, ns: 25.0})
+      expect(described_class.parse_buffer("0.5,0.75")).to eq({ew: 50.0, ns: 75.0})
     end
 
     it "returns nil for negative values" do
       expect(described_class.parse_buffer("-10")).to be_nil
+      expect(described_class.parse_buffer("20,-10")).to be_nil
+      expect(described_class.parse_buffer("-5,20")).to be_nil
     end
 
     it "returns nil for values over 100" do
       expect(described_class.parse_buffer("101")).to be_nil
       expect(described_class.parse_buffer("200")).to be_nil
+      expect(described_class.parse_buffer("20,101")).to be_nil
+      expect(described_class.parse_buffer("150,20")).to be_nil
     end
 
     it "returns nil for non-numeric values" do
       expect(described_class.parse_buffer("abc")).to be_nil
+      expect(described_class.parse_buffer("20,abc")).to be_nil
+      expect(described_class.parse_buffer("abc,20")).to be_nil
+    end
+
+    it "returns nil for wrong number of values" do
+      expect(described_class.parse_buffer("10,20,30")).to be_nil
     end
   end
 
@@ -105,12 +131,12 @@ RSpec.describe NaturalEarth::ExtentParser do
     end
 
     it "applies 0% buffer (no change)" do
-      result = described_class.apply_buffer(extent, 0.0)
+      result = described_class.apply_buffer(extent, {ew: 0.0, ns: 0.0})
       expect(result).to eq(extent)
     end
 
-    it "applies 20% buffer" do
-      result = described_class.apply_buffer(extent, 20.0)
+    it "applies 20% uniform buffer" do
+      result = described_class.apply_buffer(extent, {ew: 20.0, ns: 20.0})
 
       # Original extent: width=8.0, height=6.0
       # 20% buffer: buffer_x=1.6, buffer_y=1.2
@@ -120,8 +146,8 @@ RSpec.describe NaturalEarth::ExtentParser do
       expect(result[:ymax]).to be_within(0.01).of(35.2)
     end
 
-    it "applies 50% buffer" do
-      result = described_class.apply_buffer(extent, 50.0)
+    it "applies 50% uniform buffer" do
+      result = described_class.apply_buffer(extent, {ew: 50.0, ns: 50.0})
 
       # Original extent: width=8.0, height=6.0
       # 50% buffer: buffer_x=4.0, buffer_y=3.0
@@ -131,8 +157,8 @@ RSpec.describe NaturalEarth::ExtentParser do
       expect(result[:ymax]).to be_within(0.01).of(37.0)
     end
 
-    it "applies 100% buffer (doubles extent)" do
-      result = described_class.apply_buffer(extent, 100.0)
+    it "applies 100% uniform buffer (doubles extent)" do
+      result = described_class.apply_buffer(extent, {ew: 100.0, ns: 100.0})
 
       # Original extent: width=8.0, height=6.0
       # 100% buffer: buffer_x=8.0, buffer_y=6.0
@@ -140,6 +166,30 @@ RSpec.describe NaturalEarth::ExtentParser do
       expect(result[:ymin]).to be_within(0.01).of(22.0)
       expect(result[:xmax]).to be_within(0.01).of(-79.0)
       expect(result[:ymax]).to be_within(0.01).of(40.0)
+    end
+
+    it "applies independent EW and NS buffers" do
+      result = described_class.apply_buffer(extent, {ew: 25.0, ns: 50.0})
+
+      # Original extent: width=8.0, height=6.0
+      # 25% EW buffer: buffer_x=2.0
+      # 50% NS buffer: buffer_y=3.0
+      expect(result[:xmin]).to be_within(0.01).of(-97.0)
+      expect(result[:ymin]).to be_within(0.01).of(25.0)
+      expect(result[:xmax]).to be_within(0.01).of(-85.0)
+      expect(result[:ymax]).to be_within(0.01).of(37.0)
+    end
+
+    it "applies different independent buffers for oblong extent" do
+      result = described_class.apply_buffer(extent, {ew: 30.0, ns: 10.0})
+
+      # Original extent: width=8.0, height=6.0
+      # 30% EW buffer: buffer_x=2.4
+      # 10% NS buffer: buffer_y=0.6
+      expect(result[:xmin]).to be_within(0.01).of(-97.4)
+      expect(result[:ymin]).to be_within(0.01).of(27.4)
+      expect(result[:xmax]).to be_within(0.01).of(-84.6)
+      expect(result[:ymax]).to be_within(0.01).of(34.6)
     end
   end
 
