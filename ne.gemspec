@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
 
-  spec.files = Dir["lib/**/*", "bin/*", "README.md", "LICENSE", "AGENTS.md", "CLAUDE.md"]
+  spec.files = Dir["lib/**/*", "bin/*", "ne.csv", "README.md", "LICENSE", "AGENTS.md", "CLAUDE.md"]
   spec.bindir = "bin"
   spec.executables = ["ne"]
   spec.require_paths = ["lib"]

@@ -8,6 +8,9 @@ module NaturalEarth
     module Commands
       extend Dry::CLI::Registry
 
+      # Path to the bundled ne.csv file in the gem
+      NE_CSV_PATH = File.expand_path("../../../ne.csv", __dir__)
+
       class List < Dry::CLI::Command
         desc "List available Natural Earth layers"
 
@@ -29,14 +32,13 @@ module NaturalEarth
           end
 
           # Read and parse CSV file
-          csv_path = File.join(Dir.pwd, "ne.csv")
-          unless File.exist?(csv_path)
-            puts Rainbow("Error: ne.csv not found in current directory").red
+          unless File.exist?(NE_CSV_PATH)
+            puts Rainbow("Error: Could not find ne.csv data file").red
             return
           end
 
           layers = []
-          CSV.foreach(csv_path, headers: true) do |row|
+          CSV.foreach(NE_CSV_PATH, headers: true) do |row|
             # Skip malformed entries (e.g., those with paths)
             next if row["layer"].nil? || row["layer"].start_with?("ne/")
             # Filter by scale if provided
@@ -143,8 +145,7 @@ module NaturalEarth
           buffered_extent = ExtentParser.apply_buffer(parsed_extent, buffer_pct)
 
           # Build layer map from CSV
-          csv_path = File.join(Dir.pwd, "ne.csv")
-          layer_map = LayerResolver.build_layer_map(csv_path, scale)
+          layer_map = LayerResolver.build_layer_map(NE_CSV_PATH, scale)
           if layer_map.empty?
             puts Rainbow("Error: Could not read layer information from ne.csv").red
             return
