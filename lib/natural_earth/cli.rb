@@ -117,6 +117,15 @@ module NaturalEarth
         NE_DATA_DIR = "/Users/Shared/Geodata/ne"
 
         def call(scale: nil, extent: nil, buffer: nil, layers: nil, output: nil, **)
+          # Store original arguments for metadata
+          original_args = {
+            scale: scale,
+            extent: extent,
+            buffer: buffer,
+            layers: layers,
+            output: output
+          }
+
           # Validate scale
           unless ["10", "50", "110"].include?(scale)
             print_scale_reminder
@@ -197,13 +206,17 @@ module NaturalEarth
 
           # Extract each layer
           success_count = 0
+          extraction_results = []
           available_layers.each_with_index do |layer, idx|
             layer_info = layer_map[layer]
             source_path = File.join(NE_DATA_DIR, "#{scale}m_#{layer_info[:theme]}", "ne_#{scale}m_#{layer}.shp")
 
             print "  [#{idx + 1}/#{available_layers.size}] #{layer}... "
 
-            if extract_layer(source_path, dest_dir, buffered_extent)
+            success = extract_layer(source_path, dest_dir, buffered_extent)
+            extraction_results << {name: layer, success: success}
+
+            if success
               puts Rainbow("✓").green
               success_count += 1
             else
@@ -212,6 +225,35 @@ module NaturalEarth
           end
 
           puts ""
+
+          # Write metadata.json
+          begin
+            derived_data = {
+              parsed_extent: parsed_extent,
+              buffer_config: buffer_config,
+              buffered_extent: buffered_extent,
+              destination_directory: dest_dir,
+              resolved_layers: available_layers
+            }
+
+            extraction_summary = {
+              total_layers: available_layers.size,
+              successful: success_count,
+              failed: available_layers.size - success_count,
+              layers: extraction_results,
+              unavailable_layers: unavailable_layers
+            }
+
+            MetadataWriter.write_metadata(
+              dest_dir,
+              original_args,
+              derived_data,
+              extraction_summary
+            )
+          rescue => e
+            puts Rainbow("⚠ Could not write metadata.json: #{e.message}").yellow
+          end
+
           if success_count == available_layers.size
             puts Rainbow("✓ Successfully extracted #{success_count} layers").green
           else
