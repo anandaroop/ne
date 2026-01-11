@@ -27,7 +27,6 @@ Before installing `ne`, you need:
    - Ubuntu/Debian: `apt-get install gdal-bin`
    - Check installation: `ogr2ogr --version`
 3. **Natural Earth dataset** installed locally at `/Users/Shared/Geodata/ne`
-4. **ne.csv file** in your working directory (lists available layers)
 
 ## Installation
 
@@ -88,6 +87,7 @@ ne extract --scale 110 --extent -92,28,-88,32
 #### Required Options
 
 - `--scale` or `-s`: Scale of the data
+
   - `10` - 1:10,000,000 (largest scale, greatest detail)
   - `50` - 1:50,000,000 (intermediate scale, moderate detail)
   - `110` - 1:110,000,000 (smallest scale, least detail)
@@ -98,12 +98,14 @@ ne extract --scale 110 --extent -92,28,-88,32
 #### Optional Options
 
 - `--buffer` or `-b`: Expand the extent by a percentage (default: 20%)
+
   - Single value applies to both axes: `--buffer 15` (15% buffer on all sides)
   - Two values for independent control: `--buffer 25,15` (25% east-west, 15% north-south)
   - Specify as decimal (0-1) or percentage (1-100)
   - Examples: `--buffer 0.15`, `--buffer 15`, `--buffer 25,15`
 
 - `--layers` or `-l`: Comma-separated list of layers to extract
+
   - Default layers (if omitted):
     - `land`
     - `lakes`
@@ -198,7 +200,8 @@ ne clean
 ```
 
 This command:
-- Scans the current directory for Natural Earth extraction folders (matching pattern `ne-{scale}m-{coordinates}`)
+
+- Scans the current directory for Natural Earth extraction folders (matching pattern `ne-{scale}m-{coordinates}…`)
 - Shows a list of directories to be deleted
 - Asks for confirmation before deletion
 - Reports success or failure for each deletion
