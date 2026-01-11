@@ -8,11 +8,14 @@ A command-line tool for extracting vector basemap data from the Natural Earth da
 
 - Extract multiple Natural Earth layers for a specific geographic extent
 - Choose from three detail levels: 1:10m, 1:50m, or 1:110m scale
-- Apply buffer around your extent for context
+- Apply buffer around your extent for context, with independent control for east-west and north-south
 - Default basemap layer set or custom layer selection
-- List all available layers by scale
+- List all available layers by scale, theme, or default status
 - Automatically prevents overwriting existing extractions with sequence numbering
 - Specify custom output directory
+- Clean up Natural Earth output directories
+- Show example usage commands
+- Display version information
 
 ## Prerequisites
 
@@ -54,6 +57,26 @@ ne list --scale 110
 ne list -s 50
 ```
 
+Filter by theme:
+
+```bash
+ne list --theme physical
+ne list -t cultural
+```
+
+Filter to only default layers:
+
+```bash
+ne list --default
+ne list -d
+```
+
+Combine filters:
+
+```bash
+ne list --scale 10 --theme cultural --default
+```
+
 ### Extract Data
 
 Extract Natural Earth data for a specific geographic extent:
@@ -75,9 +98,10 @@ ne extract --scale 110 --extent -92,28,-88,32
 #### Optional Options
 
 - `--buffer` or `-b`: Expand the extent by a percentage (default: 20%)
-  - Specify as decimal: `0.15` (15%)
-  - Specify as percentage: `25` (25%)
-  - Example: `--buffer 0.15` or `--buffer 15`
+  - Single value applies to both axes: `--buffer 15` (15% buffer on all sides)
+  - Two values for independent control: `--buffer 25,15` (25% east-west, 15% north-south)
+  - Specify as decimal (0-1) or percentage (1-100)
+  - Examples: `--buffer 0.15`, `--buffer 15`, `--buffer 25,15`
 
 - `--layers` or `-l`: Comma-separated list of layers to extract
   - Default layers (if omitted):
@@ -116,6 +140,12 @@ Extract with 15% buffer:
 ne extract --scale 110 --extent -92,28,-88,32 --buffer 0.15
 ```
 
+Extract with independent east-west and north-south buffers:
+
+```bash
+ne extract --scale 110 --extent -92,28,-88,32 --buffer 25,15
+```
+
 #### Custom layers
 
 Extract specific layers:
@@ -146,6 +176,39 @@ Extract to a specific directory:
 
 ```bash
 ne extract --scale 110 --extent -92,28,-88,32 --output ~/geodata/extracts
+```
+
+### Show Example Commands
+
+Display a curated list of example usage commands:
+
+```bash
+ne examples
+ne tldr
+```
+
+This shows common usage patterns with comments explaining each command.
+
+### Clean Up Extractions
+
+Remove Natural Earth output directories from the current directory:
+
+```bash
+ne clean
+```
+
+This command:
+- Scans the current directory for Natural Earth extraction folders (matching pattern `ne-{scale}m-{coordinates}`)
+- Shows a list of directories to be deleted
+- Asks for confirmation before deletion
+- Reports success or failure for each deletion
+
+### Show Version
+
+Display the current version of the `ne` tool:
+
+```bash
+ne version
 ```
 
 ## Output
