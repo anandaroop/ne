@@ -8,7 +8,8 @@
       "Bash(bundle exec rake lint:*)",
       "Bash(bundle exec rspec:*)",
       "Bash(bundle exec rake:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(bundle exec ruby:*)"
     ]
   }
 }

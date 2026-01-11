@@ -149,3 +149,12 @@ ogr2ogr -spat -95.0 28.0 -87.7 33.8 -clipsrc spat_extent ne-10m--95-28--88-34 /U
 - optional arg `--output` or `-o`
   - allows data to be written to any directory, not just current working dir
   - if provided, create the destination folder as a subfolder in the provided path
+
+### Clean up the working dir
+
+`ne clean` (no shortcut)
+
+- determine the list of output folders in the current directory, e.g. the ones that look something like `ne-50m--92-28--88-32-1`
+- confirm with the user the full list of deletions
+- if confirmed, delete those directories
+- be sure the folder detection logic matches the folder naming logic

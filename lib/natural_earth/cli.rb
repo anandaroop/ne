@@ -1,6 +1,7 @@
 require "dry/cli"
 require "rainbow"
 require "csv"
+require "fileutils"
 
 module NaturalEarth
   module CLI
@@ -263,8 +264,83 @@ module NaturalEarth
         end
       end
 
+      class Clean < Dry::CLI::Command
+        desc "Clean up Natural Earth output directories from the current directory"
+
+        def call(**)
+          # Find all directories matching the pattern
+          output_dirs = find_output_directories(Dir.pwd)
+
+          if output_dirs.empty?
+            puts Rainbow("No Natural Earth output directories found in current directory").yellow
+            return
+          end
+
+          # Display directories to be deleted
+          puts Rainbow("\nThe following directories will be deleted:").bright.cyan
+          output_dirs.each do |dir|
+            puts "  #{File.basename(dir)}"
+          end
+          puts ""
+
+          # Confirm with user
+          print "Delete these #{output_dirs.size} directories? (y/N): "
+          response = $stdin.gets.chomp.downcase
+
+          unless ["y", "yes"].include?(response)
+            puts Rainbow("Cancelled. No directories were deleted.").yellow
+            return
+          end
+
+          # Delete directories
+          success_count = 0
+          output_dirs.each do |dir|
+            if delete_directory(dir)
+              success_count += 1
+            else
+              puts Rainbow("  Failed to delete: #{File.basename(dir)}").red
+            end
+          end
+
+          puts ""
+          if success_count == output_dirs.size
+            puts Rainbow("✓ Successfully deleted #{success_count} directories").green
+          else
+            puts Rainbow("⚠ Deleted #{success_count}/#{output_dirs.size} directories").yellow
+          end
+        end
+
+        private
+
+        # Find all output directories matching the naming pattern
+        # Pattern: ne-{scale}m-{xmin}-{ymin}-{xmax}-{ymax}[-sequence]
+        # Examples: ne-10m--95-28--88-34, ne-50m--92-28--88-32-1
+        def find_output_directories(base_path)
+          # Regex to match the directory pattern
+          # Scale: 10, 50, or 110
+          # Each coordinate is separated by a dash, and can be negative (resulting in --)
+          # Optional sequence number at the end
+          pattern = /^ne-(10|50|110)m-(-?\d+)-(-?\d+)-(-?\d+)-(-?\d+)(-\d+)?$/
+
+          Dir.entries(base_path)
+            .select { |entry| File.directory?(File.join(base_path, entry)) }
+            .select { |entry| entry.match?(pattern) }
+            .map { |entry| File.join(base_path, entry) }
+            .sort
+        end
+
+        def delete_directory(dir)
+          FileUtils.rm_rf(dir)
+          true
+        rescue => e
+          warn "Error deleting #{dir}: #{e.message}" if ENV["DEBUG"]
+          false
+        end
+      end
+
       register "list", List, aliases: ["l"]
       register "extract", Extract, aliases: ["e"]
+      register "clean", Clean
     end
   end
 end
