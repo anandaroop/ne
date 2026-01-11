@@ -346,10 +346,37 @@ module NaturalEarth
         end
       end
 
+      class Examples < Dry::CLI::Command
+        desc "Show example usage commands"
+
+        EXAMPLES = [
+          {comment: "show all available layers", command: "ne list"},
+          {comment: "show all available layers for 1:10,000,000 scale", command: "ne list --scale 10"},
+          {comment: "show only default layers for 1:10,000,000 scale", command: "ne list --scale 10 --default"},
+          {comment: "show only cultural layers for 1:10,000,000 scale", command: "ne list --scale 10 --theme cultural"},
+          {comment: "extract a coarse basemap of USA", command: "ne extract --scale 110 --extent -124,24,-66,49"},
+          {comment: "extract a detailed basemap of Louisiana", command: "ne extract --scale 10 --extent -95,28,-88,34"},
+          {comment: "extract a detailed basemap of Louisiana, with a 15% buffer", command: "ne extract --scale 10 --extent -95,28,-88,34 --buffer 15"},
+          {comment: "extract a detailed basemap of Louisiana, but only the land and ocean layers", command: "ne extract --scale 10 --extent -95,28,-88,34 --layers land,ocean"},
+          {comment: "extract a detailed basemap of Louisiana, with default layers plus populated places", command: "ne extract --scale 10 --extent -95,28,-88,34 --layers default,populated_places"},
+          {comment: "extract a detailed basemap of Louisiana, but write to a separate output dir", command: "ne extract --scale 10 --extent -95,28,-88,34 --output ~/tmp"}
+        ]
+
+        def call(**)
+          puts ""
+          EXAMPLES.each do |item|
+            puts Rainbow("# #{item[:comment]}").green.bold
+            puts Rainbow(item[:command])
+            puts ""
+          end
+        end
+      end
+
       register "list", List, aliases: ["l"]
       register "extract", Extract, aliases: ["e"]
       register "clean", Clean
       register "version", Version
+      register "examples", Examples, aliases: ["tldr"]
     end
   end
 end

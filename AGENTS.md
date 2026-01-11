@@ -158,3 +158,11 @@ ogr2ogr -spat -95.0 28.0 -87.7 33.8 -clipsrc spat_extent ne-10m--95-28--88-34 /U
 - confirm with the user the full list of deletions
 - if confirmed, delete those directories
 - be sure the folder detection logic matches the folder naming logic
+
+### Show tldr example usage
+
+`ne examples` (or `ne tldr`)
+
+- show a list of example commands with comments
+
+- pretty print them so that comments are quieter than the commands
