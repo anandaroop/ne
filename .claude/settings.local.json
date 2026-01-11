@@ -5,11 +5,14 @@
       "Bash(bundle install:*)",
       "Bash(./bin/ne:*)",
       "Bash(git add:*)",
+      "Bash(git log:*)",
       "Bash(bundle exec rake lint:*)",
       "Bash(bundle exec rspec:*)",
       "Bash(bundle exec rake:*)",
       "Bash(git mv:*)",
-      "Bash(bundle exec ruby:*)"
+      "Bash(bundle exec ruby:*)",
+      "Skill(bump-version)",
+      "Skill(bump-version:*)"
     ]
   }
 }
