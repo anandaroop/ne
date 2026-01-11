@@ -98,6 +98,10 @@ ogr2ogr -spat -95.0 28.0 -87.7 33.8 -clipsrc spat_extent ne-10m--95-28--88-34 /U
   - one of `physical` or `cultural`
   - if present, filter the data to only the layers in that theme
 
+- optional arg `--default` or `-d`
+
+  - if present, filter the data to only default layers
+
 ### Extract selected data
 
 `ne extract` (or `ne e`)

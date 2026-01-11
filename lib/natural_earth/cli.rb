@@ -12,8 +12,9 @@ module NaturalEarth
 
         option :scale, type: :string, aliases: ["s"], desc: "Filter by scale (10, 50, or 110)"
         option :theme, type: :string, aliases: ["t"], desc: "Filter by theme (physical or cultural)"
+        option :default, type: :boolean, aliases: ["d"], desc: "Filter to only default layers"
 
-        def call(scale: nil, theme: nil, **)
+        def call(scale: nil, theme: nil, default: false, **)
           # Validate scale if provided
           if scale && !["10", "50", "110"].include?(scale)
             puts Rainbow("Error: Scale must be 10, 50, or 110").red
@@ -42,11 +43,15 @@ module NaturalEarth
             # Filter by theme if provided
             next if theme && row["theme"] != theme
 
+            is_default = row["default"]&.upcase == "TRUE"
+            # Filter by default if provided
+            next if default && !is_default
+
             layers << {
               scale: row["scale"],
               theme: row["theme"],
               layer: row["layer"],
-              default: row["default"]&.upcase == "TRUE"
+              default: is_default
             }
           end
 
@@ -55,6 +60,7 @@ module NaturalEarth
             filters = []
             filters << "scale #{scale}" if scale
             filters << "theme #{theme}" if theme
+            filters << "default layers" if default
 
             if filters.any?
               puts Rainbow("No layers found for #{filters.join(", ")}").yellow
@@ -68,6 +74,7 @@ module NaturalEarth
           filters = []
           filters << "#{scale}m scale" if scale
           filters << "#{theme} theme" if theme
+          filters << "default layers" if default
 
           if filters.any?
             puts Rainbow("\nNatural Earth Layers (#{filters.join(", ")}):\n").bright.cyan
