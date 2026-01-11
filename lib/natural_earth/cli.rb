@@ -45,7 +45,8 @@ module NaturalEarth
             layers << {
               scale: row["scale"],
               theme: row["theme"],
-              layer: row["layer"]
+              layer: row["layer"],
+              default: row["default"]&.upcase == "TRUE"
             }
           end
 
@@ -81,7 +82,11 @@ module NaturalEarth
             scale_layers.group_by { |l| l[:theme] }.sort.each do |theme, theme_layers|
               puts Rainbow("  #{theme.capitalize}:").yellow
               theme_layers.sort_by { |l| l[:layer] }.each do |layer|
-                puts "    #{layer[:layer]}"
+                if layer[:default]
+                  puts "    " + Rainbow(layer[:layer]).bright.green.bold
+                else
+                  puts "    #{layer[:layer]}"
+                end
               end
             end
           end
@@ -129,18 +134,18 @@ module NaturalEarth
           # Calculate buffered extent
           buffered_extent = ExtentParser.apply_buffer(parsed_extent, buffer_pct)
 
-          # Determine layers to extract
-          layer_list = LayerResolver.resolve_layers(layers)
-          if layer_list.empty?
-            puts Rainbow("Error: No valid layers specified").red
-            return
-          end
-
           # Build layer map from CSV
           csv_path = File.join(Dir.pwd, "ne.csv")
           layer_map = LayerResolver.build_layer_map(csv_path, scale)
           if layer_map.empty?
             puts Rainbow("Error: Could not read layer information from ne.csv").red
+            return
+          end
+
+          # Determine layers to extract
+          layer_list = LayerResolver.resolve_layers(layers, layer_map)
+          if layer_list.empty?
+            puts Rainbow("Error: No valid layers specified").red
             return
           end
 

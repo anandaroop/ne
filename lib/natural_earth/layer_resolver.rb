@@ -2,31 +2,28 @@ require "csv"
 
 module NaturalEarth
   module LayerResolver
-    DEFAULT_LAYERS = %w[
-      land
-      lakes
-      rivers_lake_centerlines_scale_rank
-      admin_0_countries
-      admin_0_boundary_lines_disputed_areas
-      admin_0_boundary_lines_land
-      admin_1_states_provinces_scale_rank
-      admin_1_states_provinces_lines
-    ].freeze
-
     module_function
+
+    # Extract default layers from layer map
+    # @param layer_map [Hash] map of layer name => {theme:, scale:, default:}
+    # @return [Array<String>] list of default layer names
+    def get_default_layers(layer_map)
+      layer_map.select { |_name, info| info[:default] }.keys
+    end
 
     # Determine which layers to extract based on input string
     # @param layers_str [String, nil] comma-separated layer list, "default", or "default,extra1,extra2"
+    # @param layer_map [Hash] map of available layers with default information
     # @return [Array<String>] list of layer names
-    def resolve_layers(layers_str)
-      return DEFAULT_LAYERS.dup if layers_str.nil? || layers_str.empty?
+    def resolve_layers(layers_str, layer_map)
+      return get_default_layers(layer_map) if layers_str.nil? || layers_str.empty?
 
       parts = layers_str.split(",").map(&:strip).reject(&:empty?)
 
       if parts.include?("default")
         # Remove "default" and add all default layers plus any extras
         extras = parts - ["default"]
-        DEFAULT_LAYERS + extras
+        get_default_layers(layer_map) + extras
       else
         parts
       end
@@ -35,7 +32,7 @@ module NaturalEarth
     # Build a map of available layers from CSV file
     # @param csv_path [String] path to ne.csv file
     # @param scale [String] scale to filter by (10, 50, or 110)
-    # @return [Hash] map of layer name => {theme:, scale:}
+    # @return [Hash] map of layer name => {theme:, scale:, default:}
     def build_layer_map(csv_path, scale)
       return {} unless File.exist?(csv_path)
 
@@ -46,7 +43,8 @@ module NaturalEarth
 
         layer_map[row["layer"]] = {
           theme: row["theme"],
-          scale: row["scale"]
+          scale: row["scale"],
+          default: row["default"]&.upcase == "TRUE"
         }
       end
 

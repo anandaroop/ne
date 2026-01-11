@@ -85,6 +85,7 @@ ogr2ogr -spat -95.0 28.0 -87.7 33.8 -clipsrc spat_extent ne-10m--95-28--88-34 /U
 `ne list` (or `ne l`)
 
 - Lists all available data from the summary in `./ne.csv`
+- If a layer is one of the default layers as indicated by the `default` boolean column, ensure it displays more prominently in the listing
 
 #### Arguments
 
