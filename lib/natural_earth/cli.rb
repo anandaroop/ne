@@ -338,9 +338,18 @@ module NaturalEarth
         end
       end
 
+      class Version < Dry::CLI::Command
+        desc "Show version information"
+
+        def call(**)
+          puts "ne version #{NaturalEarth::VERSION}"
+        end
+      end
+
       register "list", List, aliases: ["l"]
       register "extract", Extract, aliases: ["e"]
       register "clean", Clean
+      register "version", Version
     end
   end
 end
