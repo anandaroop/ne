@@ -9,7 +9,7 @@ module NaturalEarth
       extend Dry::CLI::Registry
 
       # Path to the bundled ne.csv file in the gem
-      NE_CSV_PATH = File.expand_path("../../../ne.csv", __dir__)
+      NE_CSV_PATH = File.expand_path("../../ne.csv", __dir__)
 
       class List < Dry::CLI::Command
         desc "List available Natural Earth layers"
