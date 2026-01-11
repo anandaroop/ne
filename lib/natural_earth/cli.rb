@@ -11,11 +11,18 @@ module NaturalEarth
         desc "List available Natural Earth layers"
 
         option :scale, type: :string, aliases: ["s"], desc: "Filter by scale (10, 50, or 110)"
+        option :theme, type: :string, aliases: ["t"], desc: "Filter by theme (physical or cultural)"
 
-        def call(scale: nil, **)
+        def call(scale: nil, theme: nil, **)
           # Validate scale if provided
           if scale && !["10", "50", "110"].include?(scale)
             puts Rainbow("Error: Scale must be 10, 50, or 110").red
+            return
+          end
+
+          # Validate theme if provided
+          if theme && !["physical", "cultural"].include?(theme)
+            puts Rainbow("Error: Theme must be physical or cultural").red
             return
           end
 
@@ -32,6 +39,8 @@ module NaturalEarth
             next if row["layer"].nil? || row["layer"].start_with?("ne/")
             # Filter by scale if provided
             next if scale && row["scale"] != scale
+            # Filter by theme if provided
+            next if theme && row["theme"] != theme
 
             layers << {
               scale: row["scale"],
@@ -42,8 +51,12 @@ module NaturalEarth
 
           # Display results
           if layers.empty?
-            if scale
-              puts Rainbow("No layers found for scale #{scale}").yellow
+            filters = []
+            filters << "scale #{scale}" if scale
+            filters << "theme #{theme}" if theme
+
+            if filters.any?
+              puts Rainbow("No layers found for #{filters.join(", ")}").yellow
             else
               puts Rainbow("No layers found").yellow
             end
@@ -51,8 +64,12 @@ module NaturalEarth
           end
 
           # Print header
-          if scale
-            puts Rainbow("\nNatural Earth Layers (#{scale}m scale):\n").bright.cyan
+          filters = []
+          filters << "#{scale}m scale" if scale
+          filters << "#{theme} theme" if theme
+
+          if filters.any?
+            puts Rainbow("\nNatural Earth Layers (#{filters.join(", ")}):\n").bright.cyan
           else
             puts Rainbow("\nNatural Earth Layers:\n").bright.cyan
           end

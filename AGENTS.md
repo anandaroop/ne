@@ -89,7 +89,13 @@ ogr2ogr -spat -95.0 28.0 -87.7 33.8 -clipsrc spat_extent ne-10m--95-28--88-34 /U
 #### Arguments
 
 - optional arg `--scale` or `-s`
+
   - if present, filter the data to only that scale
+
+- optional arg `--theme` or `-t`
+
+  - one of `physical` or `cultural`
+  - if present, filter the data to only the layers in that theme
 
 ### Extract selected data
 
