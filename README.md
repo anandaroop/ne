@@ -1,21 +1,19 @@
 # ne
 
-A command-line tool for extracting vector basemap data from the Natural Earth dataset.
+A command-line tool for extracting vector basemap data from the Natural Earth dataset:
+
+```sh
+ne extract --scale 110 --extent -92,28,-88,32
+```
 
 `ne` wraps the GDAL `ogr2ogr` utility to quickly extract relevant geospatial layers from Natural Earth in shapefile format for a specific geographic extent.
 
 ## Features
 
 - Extract multiple Natural Earth layers for a specific geographic extent
-- Choose from three detail levels: 1:10m, 1:50m, or 1:110m scale
+- Choose from NE’s three detail levels: 1:10m, 1:50m, or 1:110m scale
 - Apply buffer around your extent for context, with independent control for east-west and north-south
 - Default basemap layer set or custom layer selection
-- List all available layers by scale, theme, or default status
-- Automatically prevents overwriting existing extractions with sequence numbering
-- Specify custom output directory
-- Clean up Natural Earth output directories
-- Show example usage commands
-- Display version information
 
 ## Prerequisites
 
@@ -24,7 +22,6 @@ Before installing `ne`, you need:
 1. **Ruby 3.4.5 or later**
 2. **GDAL** with the `ogr2ogr` utility installed
    - macOS: `brew install gdal`
-   - Ubuntu/Debian: `apt-get install gdal-bin`
    - Check installation: `ogr2ogr --version`
 3. **Natural Earth dataset** installed locally
    - Default location: `/Users/Shared/Geodata/ne`
@@ -35,7 +32,7 @@ Before installing `ne`, you need:
 Clone the repository and install as a local gem:
 
 ```bash
-git clone https://github.com/yourusername/ne.git
+git clone https://github.com/anandaroop/ne.git
 cd ne
 bundle install
 bundle exec rake install  # installs onto your system
@@ -93,7 +90,7 @@ ne list --theme physical
 ne list -t cultural
 ```
 
-Filter to only default layers:
+Filter to only default layers (a handful of basic physical and cultural layers that `ne extract` will extract by default, unless an a list of layers is explicity specified; see below):
 
 ```bash
 ne list --default
@@ -263,10 +260,6 @@ Each directory contains the extracted layers as shapefiles with their associated
 
 ## Troubleshooting
 
-### "ne.csv not found in current directory"
-
-The `ne.csv` file must be present in your current working directory when running `ne list` or `ne extract`. This file contains the catalog of available Natural Earth layers.
-
 ### "ogr2ogr command not found"
 
 GDAL is not installed or not in your PATH. Install GDAL using your system's package manager.
@@ -276,6 +269,7 @@ GDAL is not installed or not in your PATH. Install GDAL using your system's pack
 The Natural Earth dataset is not installed at the expected location, or the specific layer is not available at the requested scale.
 
 **Solutions:**
+
 - Verify the dataset exists at `/Users/Shared/Geodata/ne` (default location)
 - If your dataset is elsewhere, set the `NE_DATA_DIR` environment variable (see Configuration section)
 - Use `ne list --scale <scale>` to see available layers at the specified scale
