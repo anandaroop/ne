@@ -1,0 +1,32 @@
+# Ruby
+*.gem
+*.rbc
+.bundle
+.config
+vendor/bundle
+lib/bundler/man
+pkg
+rdoc
+spec/reports
+test/tmp
+test/version_tmp
+tmp
+
+# RSpec
+coverage/
+.rspec_status
+
+# Development
+*.log
+*.swp
+*.swo
+*~
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Output directories from ne-extract itself
+ne-*m-*/
