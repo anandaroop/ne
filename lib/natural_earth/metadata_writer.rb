@@ -48,7 +48,7 @@ module NaturalEarth
         metadata: {
           ne_version: VERSION,
           ruby_version: RUBY_VERSION,
-          natural_earth_data_dir: "/Users/Shared/Geodata/ne"
+          natural_earth_data_dir: NaturalEarth::NE_DATA_DIR
         }
       }
     end

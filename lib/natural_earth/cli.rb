@@ -114,8 +114,6 @@ module NaturalEarth
         option :layers, type: :string, aliases: ["l"], desc: "Comma-separated layer list (default: standard basemap layers)"
         option :output, type: :string, aliases: ["o"], desc: "Output directory (default: current directory)"
 
-        NE_DATA_DIR = "/Users/Shared/Geodata/ne"
-
         def call(scale: nil, extent: nil, buffer: nil, layers: nil, output: nil, **)
           # Store original arguments for metadata
           original_args = {
@@ -209,7 +207,7 @@ module NaturalEarth
           extraction_results = []
           available_layers.each_with_index do |layer, idx|
             layer_info = layer_map[layer]
-            source_path = File.join(NE_DATA_DIR, "#{scale}m_#{layer_info[:theme]}", "ne_#{scale}m_#{layer}.shp")
+            source_path = File.join(NaturalEarth::NE_DATA_DIR, "#{scale}m_#{layer_info[:theme]}", "ne_#{scale}m_#{layer}.shp")
 
             print "  [#{idx + 1}/#{available_layers.size}] #{layer}... "
 

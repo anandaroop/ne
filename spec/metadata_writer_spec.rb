@@ -100,7 +100,7 @@ RSpec.describe NaturalEarth::MetadataWriter do
 
       expect(metadata[:metadata][:ne_version]).to eq(NaturalEarth::VERSION)
       expect(metadata[:metadata][:ruby_version]).to eq(RUBY_VERSION)
-      expect(metadata[:metadata][:natural_earth_data_dir]).to eq("/Users/Shared/Geodata/ne")
+      expect(metadata[:metadata][:natural_earth_data_dir]).to eq(NaturalEarth::NE_DATA_DIR)
     end
 
     it "handles dual-axis buffer config" do

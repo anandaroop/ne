@@ -26,7 +26,9 @@ Before installing `ne`, you need:
    - macOS: `brew install gdal`
    - Ubuntu/Debian: `apt-get install gdal-bin`
    - Check installation: `ogr2ogr --version`
-3. **Natural Earth dataset** installed locally at `/Users/Shared/Geodata/ne`
+3. **Natural Earth dataset** installed locally
+   - Default location: `/Users/Shared/Geodata/ne`
+   - Can be customized via the `NE_DATA_DIR` environment variable (see Configuration below)
 
 ## Installation
 
@@ -38,6 +40,34 @@ cd ne
 bundle install
 bundle exec rake install  # installs onto your system
 ```
+
+## Configuration
+
+### Custom Natural Earth Data Directory
+
+By default, `ne` expects the Natural Earth dataset to be located at `/Users/Shared/Geodata/ne`. If your dataset is in a different location, you can configure it using the `NE_DATA_DIR` environment variable.
+
+**One-time usage:**
+
+```bash
+NE_DATA_DIR=/path/to/your/natural-earth ne extract --scale 110 --extent -92,28,-88,32
+```
+
+**Persistent configuration:**
+
+Add to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.):
+
+```bash
+export NE_DATA_DIR=/path/to/your/natural-earth
+```
+
+Then use `ne` commands normally:
+
+```bash
+ne extract --scale 110 --extent -92,28,-88,32
+```
+
+The configured path will also be recorded in the `metadata.json` file of each extraction for reproducibility.
 
 ## Usage
 
@@ -243,7 +273,12 @@ GDAL is not installed or not in your PATH. Install GDAL using your system's pack
 
 ### "Source file not found"
 
-The Natural Earth dataset is not installed at the expected location (`/Users/Shared/Geodata/ne`), or the specific layer is not available at the requested scale. Use `ne list --scale <scale>` to see available layers.
+The Natural Earth dataset is not installed at the expected location, or the specific layer is not available at the requested scale.
+
+**Solutions:**
+- Verify the dataset exists at `/Users/Shared/Geodata/ne` (default location)
+- If your dataset is elsewhere, set the `NE_DATA_DIR` environment variable (see Configuration section)
+- Use `ne list --scale <scale>` to see available layers at the specified scale
 
 ### "Output directory does not exist"
 
