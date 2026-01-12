@@ -19,7 +19,7 @@ ne extract --scale 110 --extent -92,28,-88,32
 
 Before installing `ne`, you need:
 
-1. **Ruby 3.4.5 or later**
+1. **Ruby 3.2 or later**
 2. **GDAL** with the `ogr2ogr` utility installed
    - macOS: `brew install gdal`
    - Check installation: `ogr2ogr --version`

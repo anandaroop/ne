@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.description = "A command-line tool that wraps ogr2ogr to quickly extract relevant data from Natural Earth in shapefile format"
   spec.homepage = "https://github.com/yourusername/ne"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 3.4.0"
+  spec.required_ruby_version = ">= 3.2.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
